@@ -33,16 +33,6 @@
 			log('Connecting...');
 			Server = new FancyWebSocket('ws://10.100.80.99:9300');
 
-			$('#message').keypress(function(e) {
-				if ( e.keyCode == 13 && this.value ) {
-					var name = $("#user").val();
-					log(name + ': ' + this.value);
-
-					send(name, this.value);
-					$(this).val('');
-				}
-			});
-
 			//Let the user know we're connected
 			Server.bind('open', function() {
 				log( "Connected." );
@@ -62,6 +52,16 @@
 			});
 
 			Server.connect();
+
+			$('#message').keypress(function(e) {
+				if ( e.keyCode == 13 && this.value ) {
+					var name = $("#user").val();
+					log(name + ': ' + this.value);
+
+					send(name, this.value);
+					$(this).val('');
+				}
+			});
 		});
 	</script>
 </head>

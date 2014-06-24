@@ -15,8 +15,8 @@ function wsOnMessage($clientID, $json, $messageLength, $binary)
 	$ip = long2ip($Server->wsClients[$clientID][6]);
 
 	$json = json_decode($json);
-	$name = $json->name;
-	$message = $json->message;
+	$name = htmlspecialchars($json->name);
+	$message = htmlspecialchars($json->message);
 
 	// set user name
 	if (strlen($name)) {
@@ -35,13 +35,42 @@ function wsOnMessage($clientID, $json, $messageLength, $binary)
 	if ( sizeof($Server->wsClients) == 1 ) {
 		$Server->wsSend($clientID, "There isn't anyone else in the room, but I'll still listen to you. --Your Trusty Server");
 	} else {
-		//Send the message to everyone but the person who said it
-		foreach ( $Server->wsClients as $id => $client ) {
-			if ( $id != $clientID ) {
-				$Server->wsSend($id, "{$visitorMap[$clientID]} said \"$message\"");
+
+		if (!useCommand($clientID, $message)) {
+			//Send the message to everyone but the person who said it
+			foreach ( $Server->wsClients as $id => $client ) {
+				if ( $id != $clientID ) {
+					$Server->wsSend($id, "{$visitorMap[$clientID]} said \"$message\"");
+				}
 			}
 		}
 	}
+}
+
+function useCommand($clientID, $command)
+{
+	global $visitorMap;
+	global $Server;
+
+	$isUsed = false;
+	switch ($command) {
+		case ":list-user":
+			$userIdAry = array_keys($Server->wsClients);
+			$userNameAry = array();
+			foreach ($userIdAry as $userId) {
+				if (isset($visitorMap[$userId])) {
+					$userNameAry[] = $visitorMap[$userId];
+				} else {
+					$ip = long2ip($Server->wsClients[$userId][6]);
+					$userNameAry[] = "Visitor $userId ($ip)";
+				}
+			}
+			$Server->wsSend($clientID, implode(" ; ", $userNameAry));
+			$isUsed = true;
+			break;
+	}
+
+	return $isUsed;
 }
 
 // when a client connects
