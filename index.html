@@ -7,7 +7,9 @@
 
 		#body {max-width:800px;margin:auto}
 		#log {width:100%;height:400px}
-		#message {width:100%;line-height:20px}
+		.input{display: block;}
+		#user {width:18%;line-height:20px}
+		#message {width:80%;line-height:20px}
 	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script src="fancywebsocket.js"></script>
@@ -22,19 +24,21 @@
 			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
 		}
 
-		function send( text ) {
-			Server.send( 'message', text );
+		function send( name, text ) {
+			var message = {name:name, message:text};
+			Server.send('message', JSON.stringify(message));
 		}
 
 		$(document).ready(function() {
 			log('Connecting...');
-			Server = new FancyWebSocket('ws://127.0.0.1:9300');
+			Server = new FancyWebSocket('ws://10.100.80.99:9300');
 
 			$('#message').keypress(function(e) {
 				if ( e.keyCode == 13 && this.value ) {
-					log( 'You: ' + this.value );
-					send( this.value );
+					var name = $("#user").val();
+					log(name + ': ' + this.value);
 
+					send(name, this.value);
 					$(this).val('');
 				}
 			});
@@ -50,6 +54,9 @@
 			});
 
 			//Log any messages sent from server
+			Server.bind('name', function( payload ) {});
+
+			//Log any messages sent from server
 			Server.bind('message', function( payload ) {
 				log( payload );
 			});
@@ -62,7 +69,10 @@
 <body>
 	<div id='body'>
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
-		<input type='text' id='message' name='message' />
+		<div class="input">
+			<input type="text" id="user" name="user" placeholder="Input name" value="Visitor" />
+			<input type='text' id='message' name='message' placeholder="Input message" />
+		</div>
 	</div>
 </body>
 

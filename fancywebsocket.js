@@ -26,8 +26,8 @@ var FancyWebSocket = function(url)
 			dispatch('message', evt.data);
 		};
 
-		this.conn.onclose = function(){dispatch('close',null)}
-		this.conn.onopen = function(){dispatch('open',null)}
+		this.conn.onclose = function(){dispatch('close',null);};
+		this.conn.onopen = function(){dispatch('open',null);};
 	};
 
 	this.disconnect = function() {
@@ -38,7 +38,7 @@ var FancyWebSocket = function(url)
 		var chain = callbacks[event_name];
 		if(typeof chain == 'undefined') return; // no callbacks for this event
 		for(var i = 0; i < chain.length; i++){
-			chain[i]( message )
+			chain[i]( message );
 		}
-	}
+	};
 };
